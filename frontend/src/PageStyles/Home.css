@@ -1,0 +1,58 @@
+.plant-home { min-height: 100vh; background: #f4fbf6; padding: 24px 24px 0; color: #12351f; overflow-x: hidden; }
+.plant-hero, .plant-category-rail, .plant-products { max-width: 1180px; margin-left: auto; margin-right: auto; }
+.plant-hero { min-height: 330px; border-radius: 10px; background-position: center; background-size: cover; overflow: hidden; position: relative; display: flex; align-items: center; }
+.plant-hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(13, 62, 45, .78), rgba(13, 62, 45, .14) 70%); }
+.plant-hero-copy { position: relative; z-index: 1; max-width: 430px; padding: 38px 8%; color: #fff; }
+.plant-hero-copy span, .plant-eyebrow { font: 700 10px/1.2 Arial, sans-serif; letter-spacing: .2em; }
+.plant-hero-copy h1 { margin: 13px 0 12px; font: 700 clamp(2rem, 4vw, 3.5rem)/.98 Georgia, serif; }
+.plant-hero-copy p { max-width: 330px; margin: 0 0 22px; font: 15px/1.5 Arial, sans-serif; color: rgba(255,255,255,.9); }
+.plant-primary-button, .plant-promo-card a, .plant-care-banner a { display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #03541e; border-radius: 999px; padding: 11px 26px; font: 700 11px Arial, sans-serif; text-decoration: none; }
+.plant-hero-dots { position: absolute; z-index: 1; bottom: 18px; left: 50%; display: flex; gap: 6px; transform: translateX(-50%); }
+.plant-hero-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.55); }.plant-hero-dots .active { width: 20px; border-radius: 5px; background: #fff; }
+
+.plant-category-rail { display: flex; justify-content: center; column-gap: clamp(24px, 4vw, 55px); max-width: 1200px; margin: 0 auto; overflow-x: auto; padding: 22px 4px 25px; scrollbar-width: none; }
+.plant-category-rail::-webkit-scrollbar { display: none; }
+.plant-category-item { width: 110px; min-width: 110px; flex: 0 0 110px; color: #527067; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; text-decoration: none; font: 600 11px/1.25 Arial, sans-serif; }
+.plant-category-icon { display: grid; place-items: center; width: 92px; height: 92px; min-width: 92px; min-height: 92px; max-width: 92px; max-height: 92px; flex: 0 0 92px; border: 1px solid #d7e8dc; border-radius: 50%; overflow: hidden; background: #adf0be; box-shadow: 0 4px 12px rgba(3,84,30,.08); font-size: 2rem; }
+.plant-category-icon img { display: block; width: 100%; height: 100%; min-width: 100%; min-height: 100%; max-width: none; border-radius: 50%; object-fit: cover; object-position: center; }
+.plant-category-fallback { width: 34px; height: 34px; border: 2px solid #adf0be; border-radius: 50%; position: relative; }
+.plant-category-fallback::after { content: ""; position: absolute; width: 14px; height: 24px; left: 8px; top: 3px; border-radius: 100% 0; background: #adf0be; transform: rotate(-35deg); }
+.plant-category-empty { color: #55705f; font: 12px Arial, sans-serif; padding: 18px 0; }
+.plant-category-item:hover { color: #03541e; }
+.plant-category-item:hover .plant-category-icon { border-color: #03541e; transform: translateY(-2px); }
+.plant-products { padding-bottom: 42px; }.plant-section-heading { display: flex; align-items: end; justify-content: space-between; margin: 3px 0 16px; }.plant-section-heading h2 { margin: 7px 0 0; font: 700 28px Georgia, serif; color: #12351f; }.plant-eyebrow { color: #55705f; }.plant-section-heading label { color: #527067; font: 12px Arial, sans-serif; }.plant-section-heading select { margin-left: 8px; border: 0; background: transparent; color: #12351f; font-weight: 700; outline: none; }.plant-product-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }.plant-promo-card { grid-column: span 2; min-height: 300px; border-radius: 9px; overflow: hidden; position: relative; background: linear-gradient(90deg, rgba(0,62,43,.8), rgba(0,62,43,.05)), url("https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=1000&q=85") center/cover; color: #fff; }.plant-promo-card div { position: absolute; left: 24px; bottom: 24px; max-width: 260px; }.plant-promo-card span { font: 700 9px Arial, sans-serif; letter-spacing: .16em; }.plant-promo-card h3 { margin: 8px 0 16px; font: 700 24px/1.1 Georgia, serif; }.plant-promo-card a { padding: 9px 25px; }.plant-care-banner { display: flex; align-items: center; justify-content: center; gap: 34px; min-height: 142px; margin: 32px 0 0; border-radius: 9px; background: #00ad5d; color: white; text-align: center; }.plant-care-banner h2 { margin: 0; font: 700 25px Georgia, serif; }.plant-care-banner p { margin: 3px 0 14px; font: 700 23px Georgia, serif; }.plant-care-banner a { background: #03541e; color: #fff; padding: 9px 30px; }
+.plant-care-banner h2 { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); }
+.plant-care-banner p { margin: .2rem 0 1rem; font-size: clamp(1.2rem, 2.5vw, 1.65rem); }
+.plant-care-banner a { display: inline-block; border-radius: 999px; background: #03541e; color: white; padding: .65rem 2.5rem; font: 600 .7rem Arial, sans-serif; text-decoration: none; }
+
+@media (max-width: 900px) { .plant-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .plant-home { padding: 16px 12px 0; }.plant-hero { min-height: 290px; }.plant-hero-copy { padding: 28px; }.plant-hero-copy h1 { font-size: 2.35rem; }.plant-category-rail { justify-content: flex-start; column-gap: 16px; margin-left: -4px; margin-right: -4px; padding-left: 4px; padding-right: 4px; }.plant-category-item { width: 96px; min-width: 96px; flex-basis: 96px; }.plant-category-icon { width: 80px; height: 80px; min-width: 80px; min-height: 80px; max-width: 80px; max-height: 80px; flex-basis: 80px; }.plant-products { padding-bottom: 28px; }.plant-section-heading h2 { font-size: 23px; }.plant-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }.plant-promo-card { grid-column: span 2; min-height: 220px; }.plant-care-banner { flex-direction: column; gap: 4px; padding: 20px 12px; }.plant-care-banner h2 { font-size: 20px; }.plant-care-banner p { font-size: 19px; } }
+
+  
+  .home-heading {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: var(--primary-dark);
+    text-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+  
+  .home-product-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3.5rem;
+        width: 100%;
+    max-width: 1200px;
+    padding: 1rem;
+}
+  
+@media (max-width: 900px) {
+  .home-product-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7rem;
+}
+  
+}
