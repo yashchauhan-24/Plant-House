@@ -43,7 +43,7 @@ function UpdateProducts() {
         setDescription(product.description || "");
         setCategory(product.category || "");
         setStock(product.stock || "");
-        setOldImage(product.images || []);
+        setOldImage(product.image || []);
         // Clear new images when loading a product for editing
         setImage([]);
         setImagePreview([]);

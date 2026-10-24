@@ -30,4 +30,28 @@ axios.interceptors.request.use(
 	(error) => Promise.reject(error),
 );
 
+axios.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		if (error.response?.status === 401 && typeof window !== "undefined") {
+			localStorage.removeItem("adminToken");
+			localStorage.removeItem("userToken");
+			localStorage.removeItem("adminUser");
+			localStorage.removeItem("userData");
+			localStorage.removeItem("authRole");
+			localStorage.removeItem("User");
+			localStorage.removeItem("isAuthenticated");
+			localStorage.removeItem("cartItem");
+			localStorage.removeItem("wishlistItems");
+			localStorage.removeItem("shippingInfo");
+			sessionStorage.clear();
+			delete axios.defaults.headers.common.Authorization;
+			if (!window.location.pathname.endsWith("/login")) {
+				window.location.replace(window.location.pathname.startsWith("/admin") ? "/admin/login" : "/login");
+			}
+		}
+		return Promise.reject(error);
+	},
+);
+
 export default axios;

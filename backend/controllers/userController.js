@@ -5,6 +5,7 @@ import { sendToken } from "../utils/jwtToken.js";
 import { sendMail } from "../utils/sendEmail.js";
 import crypto from "crypto";
 import { v2 as cloudinary} from 'cloudinary'
+import { blacklistToken } from "../utils/tokenBlacklist.js";
 // import {generateResetPassordToken} from  '../model/user.models.js'
 // register user
 export const registerUser = handleAsyncError(async (req, res, next) => {
@@ -90,10 +91,16 @@ export const loginUSer = handleAsyncError(async (req, res, next) => {
 
 // logout
 export const logout = handleAsyncError(async (req, res, next) => {
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, "") || req.cookies?.token;
+  blacklistToken(token);
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    path: "/",
   });
+  res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, private", Pragma: "no-cache", Expires: "0" });
   res.status(200).json({
     success: true,
     message: "looged out successfully",

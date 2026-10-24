@@ -11,7 +11,8 @@ import { toast } from "react-toastify";
 import Loader from "../componant/Loader";
 
 function MyOrder() {
-  const { orders = [], loading, error, success } = useSelector((state) => state.order);
+  const { orders: storedOrders, loading, error, success } = useSelector((state) => state.order);
+  const orders = Array.isArray(storedOrders) ? storedOrders : [];
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -41,7 +42,11 @@ function MyOrder() {
   <Navbar />
   <PageTitle title="My Orders" />
 
-  {loading ? (<Loader />) : orders.length > 0 ? (
+  {loading ? (<Loader />  ) : error ? (
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <p role="alert">{error?.message || error || "Failed to load orders"}</p>
+    </div>
+  ) : orders.length > 0 ? (
 
     <div className="min-h-screen bg-gradient-to-br from-[#f4fbf6] via-[#eaf7ed] to-[#f4fbf6] px-4 py-16">
       <div className="max-w-5xl mx-auto">
@@ -79,7 +84,7 @@ function MyOrder() {
               <tbody>
                 {orders.map((order, index) => (
                   <tr
-                    key={order._id}
+                    key={order?._id || index}
                     className={`border-b border-[#d7eadb]/60 hover:bg-[#f4fbf6] transition-colors duration-150 ${
                       index === orders.length - 1 ? "border-b-0" : ""
                     }`}
@@ -87,7 +92,7 @@ function MyOrder() {
                     {/* Order ID */}
                     <td className="px-5 py-4">
                       <span className="text-xs font-mono text-[#55705f] bg-[#f4fbf6] border border-[#d7eadb] px-2 py-1 rounded-lg">
-                        #{order._id.slice(-8).toUpperCase()}
+                        #{(order?._id || "").slice(-8).toUpperCase() || "UNKNOWN"}
                       </span>
                     </td>
 
@@ -115,14 +120,14 @@ function MyOrder() {
                           : order.orderStatus === "Processing" ? "bg-[#03541e] animate-pulse"
                           : "bg-[#55705f]"}`}
                         />
-                        {order.orderStatus}
+                        {order?.orderStatus || "Processing"}
                       </span>
                     </td>
 
                     {/* Total Price */}
                     <td className="px-5 py-4 text-center">
                       <span className="text-[#03541e] font-bold text-sm">
-                        ₹{order.totalPrice}
+                        ₹{order?.totalPrice ?? 0}
                       </span>
                     </td>
 
@@ -131,7 +136,7 @@ function MyOrder() {
                       <div className="flex items-center justify-center gap-2">
                         {/* View Button */}
                         <Link
-                          to={`/order/${order._id}`}
+                          to={`/order/${order?._id || ""}`}
                           className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-[#03541e]/10 border border-[#03541e]/20 text-[#03541e] hover:bg-[#03541e]/20 hover:border-[#03541e]/40 hover:text-[#03541e] transition-all duration-200"
                           title="View order details"
                         >
@@ -139,9 +144,9 @@ function MyOrder() {
                         </Link>
 
                         {/* Delete Button - Only show if order is not delivered */}
-                        {order.orderStatus !== "Delivered" && (
+                        {(order?.orderStatus || "").toLowerCase() !== "delivered" && order?._id && (
                           <button
-                            onClick={() => handleDeleteOrder(order._id)}
+                            onClick={() => handleDeleteOrder(order?._id)}
                             disabled={loading}
                             className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-red-400/10 border border-red-400/20 text-red-500 hover:bg-red-400/20 hover:border-red-400/40 hover:text-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Delete order"

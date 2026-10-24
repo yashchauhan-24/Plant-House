@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../utils/axiosConfig.js";
+import { clearCart } from "../cart/cartSlice.js";
+import { clearWishlist } from "../wishlist/wishlistSlice.js";
 
 const AUTH_ROLE_KEY = "authRole";
 const ADMIN_TOKEN_KEY = "adminToken";
@@ -28,6 +30,24 @@ const clearRoleSession = (role) => {
         localStorage.removeItem(AUTH_ROLE_KEY);
     }
     clearLegacyKeys();
+};
+
+export const clearClientSession = (dispatch) => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("authRole");
+    localStorage.removeItem("User");
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("cartItem");
+    localStorage.removeItem("wishlistItems");
+    localStorage.removeItem("shippingInfo");
+    sessionStorage.clear();
+    delete axios.defaults.headers.common.Authorization;
+    delete axios.defaults.headers.common.authorization;
+    dispatch?.(clearCart());
+    dispatch?.(clearWishlist());
 };
 
 const saveRoleSession = (role, user, token = "") => {
@@ -207,11 +227,10 @@ export const resetPassword = createAsyncThunk("user/resetPassword", async ({toke
     }
 });
 // Logout Api
-export const logout = createAsyncThunk("user/logout", async (_, {rejectWithValue}) => {
+export const logout = createAsyncThunk("user/logout", async (_, { dispatch }) => {
+    const role = getRoleFromPath();
+    const token = localStorage.getItem(getTokenKey(role));
     try {
-        const role = getRoleFromPath();
-        const token = localStorage.getItem(getTokenKey(role));
-
         await axios.post('/api/v1/logout', {}, {
             withCredentials: true,
             headers: token
@@ -222,10 +241,11 @@ export const logout = createAsyncThunk("user/logout", async (_, {rejectWithValue
               : {},
         });
 
-        clearRoleSession(role);
-        return { success: true, role }
+        return { success: true, role };
     } catch (error) {
-        return rejectWithValue(error.response?.data || "Logout Failed");
+        return { success: false, role, error: error.response?.data || "Logout Failed" };
+    } finally {
+        clearClientSession(dispatch);
     }
 });
 
@@ -317,20 +337,20 @@ const userSlice = createSlice({
         state.loading=true,
         state.error=null
     })
-    .addCase(logout.fulfilled,(state,action)=>{
+    .addCase(logout.fulfilled,(state)=>{
         state.loading=false,
         state.error= null;
-                const activeRole = action.payload?.role || null;
-                if(!state.authRole || state.authRole === activeRole){
-                    state.user=null;
-                    state.isAuthenticated=false,
-                    state.authRole = null
-                }
+                state.user=null;
+                state.isAuthenticated=false;
+                state.authRole = null;
         
     })
     .addCase(logout.rejected,(state,action)=>{
         state.loading=false,
-        state.error=action.payload?.message || 'Logout Failed'
+        state.error=action.payload?.message || 'Logout Failed';
+        state.user=null;
+        state.isAuthenticated=false;
+        state.authRole = null;
     });
     // update profile
     builder

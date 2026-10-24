@@ -2,6 +2,7 @@ import handleAsyncError from "./handleAsyncError.js";
 import HandleErroe from "../utils/handleError.js";
 import jwt from "jsonwebtoken";
 import User from '../model/user.models.js'
+import { isTokenBlacklisted } from "../utils/tokenBlacklist.js";
 
 
 export const verifyUserAuth = handleAsyncError(async (req, res, next) => {
@@ -14,6 +15,10 @@ export const verifyUserAuth = handleAsyncError(async (req, res, next) => {
 
   if (!token) {
     token = req.cookies.token;
+  }
+
+  if (isTokenBlacklisted(token)) {
+    return res.status(401).json({ success: false, message: "Session has ended, please login again" });
   }
   
   if (!token) {
@@ -32,6 +37,11 @@ export const verifyUserAuth = handleAsyncError(async (req, res, next) => {
       return next(new HandleErroe("User no longer exists, please login again", 401));
     }
 
+    res.set({
+      "Cache-Control": "no-store, no-cache, must-revalidate, private",
+      Pragma: "no-cache",
+      Expires: "0",
+    });
     console.log("✅ User authenticated:", req.user._id);
     next();
   } catch (error) {

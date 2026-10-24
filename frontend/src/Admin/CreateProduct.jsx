@@ -16,32 +16,44 @@ export default function CreateProduct() {
   const [stock, setStock] = useState("");
   const [image, setImage] = useState([]);
   const [imagePreview, setImagePreview] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { loading, success, error, categories = [], categoryLoading } = useSelector((state) => state.admin);
   const dispatch =  useDispatch()
   const navigate = useNavigate();
   
-  const createProductSubmitHandler = () => {
+  const createProductSubmitHandler = async () => {
     if (image.length === 0) {
       toast.error("Please upload at least one product image", { position: "top-right", autoClose: 2200 });
       return;
     }
 
-    const normalizedName = name.trim();
-    const normalizedDescription = description.trim();
-    const normalizedPrice = Number(price);
-    const normalizedStock = Number(stock);
+    try {
+      setIsSubmitting(true);
+      const normalizedName = name.trim();
+      const normalizedDescription = description.trim();
+      const normalizedPrice = Number(price);
+      const normalizedStock = Number(stock);
 
-    const myForm = new FormData();
-    myForm.set("name", normalizedName);
-    myForm.set("price", normalizedPrice);
-    myForm.set("description", normalizedDescription);
-    myForm.set("category", category);
-    myForm.set("stock", normalizedStock);
-    image.forEach((img) => {
-      myForm.append("image", img);
-    })
-    dispatch(createProducts(myForm))
+      const myForm = new FormData();
+      myForm.set("name", normalizedName);
+      myForm.set("price", normalizedPrice);
+      myForm.set("description", normalizedDescription);
+      myForm.set("category", category);
+      myForm.set("stock", normalizedStock);
+      image.forEach((img) => {
+        myForm.append("image", img);
+      });
+
+      await dispatch(createProducts(myForm)).unwrap();
+    } catch (submitError) {
+      toast.error(submitError?.response?.data?.message || submitError?.message || "Failed to create product", {
+        position: "top-right",
+        autoClose: 2200,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const validationRules = {
@@ -276,10 +288,10 @@ export default function CreateProduct() {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isSubmitting}
                 className="w-full py-3.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-200 bg-[#03541e] hover:bg-[#12351f] text-[#ffffff] shadow-lg shadow-[#03541e]/20 hover:shadow-[#03541e]/40 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {loading ? "Creating..." : "Create"}
+                {loading ? "CREATING..." : "Create"}
               </button>
 
             </form>

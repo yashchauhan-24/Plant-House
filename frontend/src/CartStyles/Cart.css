@@ -22,6 +22,10 @@
   margin-bottom: 20px;  
 }
 
+.cart-empty-button {
+  color: #ffffff !important;
+}
+
 .viewProducts {
   text-decoration: none; 
   padding: 10px 20px; 

@@ -1,19 +1,58 @@
 @import "tailwindcss";
 
 :root {
-	font-family: Georgia, "Times New Roman", serif;
-	color: #12351f;
-	background: #ffffff;
+	font-family: "Poppins", "Segoe UI", sans-serif;
+	color: var(--color-text-primary);
+	background: var(--color-bg);
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
-	--primary: #03541e;
-	--primary-light: #adf0be;
-	--plant-ink: #12351f;
-	--plant-green: #03541e;
-	--plant-deep: #03541e;
-	--plant-lime: #adf0be;
-	--plant-paper: #ffffff;
-	--plant-line: #d7eadb;
+	--color-primary-900: #0B3D1E;
+	--color-primary-800: #14532D;
+	--color-primary-700: #166534;
+	--color-primary-600: #15803D;
+	--color-primary-500: #16A34A;
+	--color-primary-100: #DCFCE7;
+	--color-primary-50: #F0FDF4;
+	--color-accent-gold: #C8A951;
+	--color-bestseller: #D9F24A;
+	--color-surface: #FFFFFF;
+	--color-bg: #F6FAF7;
+	--color-text-primary: #10231A;
+	--color-text-secondary: #4B5E54;
+	--color-text-muted: #7A8B82;
+	--color-text-on-dark: #FFFFFF;
+	--color-text-on-dark-muted: #D1E7DA;
+	--color-border: #E2ECE5;
+	--color-danger: #DC2626;
+	--color-warning: #F59E0B;
+	--color-info: #2563EB;
+	--danger-bg: #DC2626;
+	--danger-bg-hover: #FEE2E2;
+	--danger-text-hover: #B91C1C;
+	--danger-border-hover: #FCA5A5;
+	--color-shadow: 0 4px 20px rgba(16, 35, 26, 0.06);
+	--hover-light-bg: #DCFCE7;
+	--hover-light-bg-strong: #BBF7D0;
+	--hover-text-dark: #14532D;
+	--hover-border: #86EFAC;
+
+	/* Compatibility aliases for the existing stylesheets. */
+	--primary: var(--color-primary-700);
+	--primary-light: var(--color-primary-100);
+	--plant-ink: var(--color-text-primary);
+	--plant-green: var(--color-primary-700);
+	--plant-deep: var(--color-primary-900);
+	--plant-lime: var(--color-primary-100);
+	--plant-paper: var(--color-surface);
+	--plant-line: var(--color-border);
+	--bg-primary: var(--color-surface);
+	--bg-secondary: var(--color-bg);
+	--text-primary: var(--color-text-primary);
+	--text-secondary: var(--color-text-secondary);
+	--text-muted: var(--color-text-muted);
+	--primary-main: var(--color-primary-700);
+	--primary-dark: var(--color-primary-900);
+	--text-light: var(--color-text-on-dark);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -24,14 +63,267 @@ body {
 	margin: 0;
 	min-width: 0;
 	overflow-x: hidden;
-	background: #f4fbf6;
+	background: var(--color-bg);
 }
 
-button, input { font: inherit; }
+button, input, select, textarea { font: inherit; }
 a { color: inherit; }
+
+button, input, select, textarea, a {
+	transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease,
+		box-shadow 200ms ease, transform 200ms ease;
+}
+
+:where(button, input, select, textarea, a):focus-visible {
+	outline: 2px solid var(--color-primary-500);
+	outline-offset: 2px;
+}
+
+button:disabled, input:disabled, select:disabled, textarea:disabled {
+	background-color: #E5E7EB;
+	color: #9CA3AF;
+	cursor: not-allowed;
+}
+
+/* Keep the two existing arbitrary-value Tailwind palettes on the new tokens. */
+.text-\[\#12351f\] { color: var(--color-text-primary) !important; }
+.text-\[\#03541e\] { color: var(--color-primary-700) !important; }
+.bg-\[\#03541e\] { background-color: var(--color-primary-900) !important; }
+.bg-\[\#adf0be\] { background-color: var(--color-primary-100) !important; }
+.border-\[\#d7eadb\] { border-color: var(--color-border) !important; }
+
+/* Shared visual contract for storefront and dashboard surfaces. */
+.plant-home, .plant-products-page, .plant-page, .dashboard-container,
+.admin-shell, .min-h-screen.bg-gradient-to-br {
+	background: var(--color-bg) !important;
+	color: var(--color-text-primary);
+}
+
+.plant-navbar, .navbar, .admin-header {
+	background: var(--color-surface) !important;
+	color: var(--color-text-primary) !important;
+	border-color: var(--color-border) !important;
+}
+.plant-nav-link, .plant-navbar a, .navbar a { color: var(--color-text-primary); }
+.plant-nav-link:hover, .plant-nav-link[aria-current="page"], .navbar a:hover { color: var(--color-primary-700); }
+.plant-nav-link[aria-current="page"] { border-bottom: 2px solid var(--color-primary-700); }
+.plant-search-input, .plant-mobile-search-form, input, select, textarea {
+	background-color: var(--color-surface);
+	color: var(--color-text-primary);
+	border-color: var(--color-border);
+}
+.plant-search-input::placeholder, input::placeholder, textarea::placeholder { color: var(--color-text-muted); }
+.plant-search-input:focus, input:focus, select:focus, textarea:focus {
+	border-color: var(--color-primary-500);
+	box-shadow: 0 0 0 3px rgba(22, 163, 74, .16);
+}
+
+.plant-primary-button, .plant-view-button, .plant-care-banner a,
+.register-btn, .add-to-cart, button.bg-\[\#03541e\] {
+	background: var(--color-primary-700) !important;
+	color: var(--color-text-on-dark) !important;
+	border-radius: 9px;
+	box-shadow: 0 4px 12px rgba(16, 35, 26, .12);
+}
+.plant-primary-button:hover, .plant-view-button:hover, .plant-care-banner a:hover,
+.register-btn:hover, .add-to-cart:hover {
+	background: var(--color-primary-600) !important;
+	color: var(--color-text-on-dark) !important;
+}
+.plant-care-banner {
+	background: linear-gradient(110deg, var(--color-primary-800), var(--color-primary-600)) !important;
+	color: var(--color-text-on-dark) !important;
+}
+.plant-care-banner a { background: var(--color-surface) !important; color: var(--color-primary-800) !important; }
+.plant-bestseller { background: var(--color-bestseller) !important; color: var(--color-primary-900) !important; }
+.plant-product-card { background: var(--color-surface); border-color: var(--color-border); box-shadow: var(--color-shadow); border-radius: 12px; }
+.plant-product-name, .plant-section-heading h2, .product-title { color: var(--color-text-primary) !important; }
+.plant-product-description, .plant-section-heading label, .plant-product-rating span { color: var(--color-text-secondary) !important; }
+.plant-product-price { color: var(--color-primary-800) !important; }
+.plant-old-price { color: var(--color-text-muted) !important; }
+.plant-category-item { color: var(--color-text-secondary); }
+.plant-category-item:hover { color: var(--color-primary-700); }
+.plant-category-icon { background: var(--color-primary-100); border-color: var(--color-border); }
+.plant-category-item:hover .plant-category-icon { border-color: var(--color-primary-700); box-shadow: 0 0 0 3px var(--color-primary-100); }
+
+.plant-hero::before, .plant-hero .bg-gradient-to-t {
+	background: linear-gradient(90deg, rgba(0, 0, 0, .65), rgba(0, 0, 0, .15)) !important;
+}
+.plant-hero h1, .plant-hero p, .plant-hero span { color: var(--color-text-on-dark) !important; text-shadow: 0 2px 8px rgba(0, 0, 0, .35); }
+.plant-hero .text-\[\#adf0be\] { color: var(--color-bestseller) !important; }
+
+footer, .plant-footer { background: var(--color-primary-900) !important; color: var(--color-text-on-dark) !important; }
+footer h3, .plant-footer h3, .plant-footer-logo { color: var(--color-text-on-dark) !important; }
+footer a, .plant-footer-column a, .plant-footer-brand p, .plant-footer-bottom, .plant-footer-bottom a { color: var(--color-text-on-dark-muted) !important; }
+footer a:hover, .plant-footer a:hover { color: var(--color-text-on-dark) !important; text-decoration: underline; }
+footer input, .plant-newsletter input { background: rgba(255,255,255,.08) !important; color: var(--color-text-on-dark) !important; border-color: rgba(255,255,255,.3) !important; }
+footer button:not(.reviews-modal-secondary):not(.modal-close-btn),
+.plant-newsletter button { color: var(--color-text-on-dark) !important; }
+
+.admin-sidebar { background: var(--color-primary-900) !important; color: var(--color-text-on-dark); }
+.admin-sidebar-item { color: var(--color-text-on-dark-muted) !important; }
+.admin-sidebar-item svg { color: currentColor !important; }
+.admin-sidebar-item:hover { background: var(--color-primary-800) !important; color: var(--color-text-on-dark) !important; }
+.admin-sidebar-item.is-active { background: var(--color-primary-700) !important; color: var(--color-text-on-dark) !important; border-left-color: var(--color-accent-gold) !important; }
+.admin-header { color: var(--color-text-primary) !important; }
+.stat-box, .social-box, .card, .modal-content { background: var(--color-surface); color: var(--color-text-primary); border-color: var(--color-border); box-shadow: var(--color-shadow); }
+.page-title, .stat-box h3, .stat-box p { color: var(--color-text-primary) !important; }
+table th { background: var(--color-primary-50); color: var(--color-text-primary); }
+table td, table th { border-color: var(--color-border) !important; }
+table tr:hover { background: var(--color-bg); }
+
+.text-green-800, .text-\[\#03541e\] { color: var(--color-primary-800) !important; }
+.bg-green-100 { background-color: var(--color-primary-100) !important; }
+.text-red-800 { color: #991B1B !important; }
+.text-amber-800 { color: #92400E !important; }
+.text-blue-800 { color: #1E40AF !important; }
 
 .text-\[\#12351f\] { color: var(--plant-ink) !important; }
 .text-\[\#03541e\] { color: var(--plant-green) !important; }
 .bg-\[\#03541e\] { background-color: var(--plant-deep) !important; }
 .bg-\[\#adf0be\] { background-color: var(--plant-lime) !important; }
 .border-\[\#d7eadb\] { border-color: var(--plant-line) !important; }
+
+/* Button and interactive-state contract. Keep disabled controls inert. */
+:where(button, a, [role="button"]):focus-visible {
+	outline: 2px solid var(--color-primary-500);
+	outline-offset: 2px;
+}
+:where(button, a, [role="button"]) { transition: all .2s ease; }
+button:disabled:hover { background-color: #E5E7EB !important; color: #9CA3AF !important; border-color: #D1D5DB !important; }
+
+.plant-primary-button, .plant-view-button, .plant-care-banner a,
+.register-btn, .add-to-cart, .checkout-btn,
+.update-item-btn, .proceed-button, .register-submit, .admin-logout-button,
+button[class*="bg-[#03541e]"] {
+	background: var(--color-primary-700) !important;
+	color: var(--color-text-on-dark) !important;
+	border: 1.5px solid var(--color-primary-700);
+}
+.plant-primary-button:hover, .plant-view-button:hover, .plant-care-banner a:hover,
+.register-btn:hover, .add-to-cart:hover, .checkout-btn:hover,
+.update-item-btn:hover, .proceed-button:hover, .register-submit:hover,
+.admin-logout-button:hover, button[class*="bg-[#03541e]"]:hover {
+	background: var(--hover-light-bg) !important;
+	color: var(--hover-text-dark) !important;
+	border-color: var(--hover-border) !important;
+}
+.plant-primary-button:active, .plant-view-button:active, .plant-care-banner a:active,
+.register-btn:active, .add-to-cart:active,
+.checkout-btn:active, .update-item-btn:active, .proceed-button:active,
+.register-submit:active, .admin-logout-button:active,
+button[class*="bg-[#03541e]"]:active { background: var(--hover-light-bg-strong) !important; color: var(--hover-text-dark) !important; }
+
+/* Existing outline and icon controls should never acquire a dark hover fill. */
+.viewProducts, .quantity-button, .remove-item-btn, .plant-icon-button,
+.pagination-btn, .profile-dropdown-badge, button[class*="border-[#03541e]"],
+a[class*="border-[#03541e]"] {
+	background: var(--color-surface);
+	color: var(--color-primary-700);
+	border: 1.5px solid var(--color-primary-700);
+}
+.viewProducts:hover, .quantity-button:hover, .remove-item-btn:hover, .plant-icon-button:hover,
+.pagination-btn:hover, button[class*="border-[#03541e]"]:hover, a[class*="border-[#03541e]"]:hover {
+	background: var(--hover-light-bg) !important;
+	color: var(--hover-text-dark) !important;
+	border-color: var(--hover-border) !important;
+}
+.viewProducts:active, .quantity-button:active, .remove-item-btn:active, .plant-icon-button:active,
+.pagination-btn:active { background: var(--hover-light-bg-strong) !important; color: var(--hover-text-dark) !important; }
+
+/* Catch legacy button hover declarations while preserving danger and dark-sidebar controls. */
+button:not(:disabled):not(.admin-sidebar-item):not(.profile-dropdown-item):not(.reviews-modal-secondary):not(.modal-close-btn):not(.remove-item-btn):not([class*="red"]):not([class*="danger"]):hover {
+	background: var(--hover-light-bg) !important;
+	color: var(--hover-text-dark) !important;
+	border-color: var(--hover-border) !important;
+}
+button:not(:disabled):hover svg, button:not(:disabled):hover .MuiSvgIcon-root { color: currentColor !important; }
+.remove-item-btn, .delete-button, button[class*="bg-red"], button[class*="text-red"] {
+	background: #FEE2E2 !important;
+	color: var(--color-danger) !important;
+	border-color: #FCA5A5 !important;
+}
+.remove-item-btn:hover, .delete-button:hover, button[class*="bg-red"]:hover, button[class*="text-red"]:hover {
+	background: #FECACA !important;
+	color: #B91C1C !important;
+	border-color: #F87171 !important;
+}
+
+/* Navbar, category, and pagination links use the same readable light hover. */
+.plant-nav-link:hover, .navbar-links a:hover, .plant-category-item:hover,
+.pagination-btn:hover { background: var(--hover-light-bg) !important; color: var(--hover-text-dark) !important; }
+.plant-count-badge { background: var(--color-primary-700); color: var(--color-text-on-dark); }
+
+/* Profile dropdown: neutral backdrop and white-on-forest menu. */
+.profile-backdrop {
+	background: rgba(255, 255, 255, .55) !important;
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+}
+.profile-dropdown {
+	border-radius: 14px !important;
+	box-shadow: 0 16px 40px rgba(16, 35, 26, .18) !important;
+	animation: profile-dropdown-in 150ms ease both;
+}
+.profile-dropdown-item {
+	background: transparent !important;
+	color: var(--color-text-on-dark) !important;
+	border: 1px solid transparent;
+}
+.profile-dropdown-item *, .profile-dropdown-item svg { color: var(--color-text-on-dark) !important; }
+.profile-dropdown-item:hover, .profile-dropdown-item:focus-visible {
+	background: rgba(255, 255, 255, .14) !important;
+	color: var(--color-text-on-dark) !important;
+	border-color: transparent !important;
+	border-radius: 8px;
+}
+.profile-dropdown-item:hover *, .profile-dropdown-item:focus-visible * { color: var(--color-text-on-dark) !important; }
+.profile-dropdown-logout:hover, .profile-dropdown-logout:hover * { color: #FECACA !important; }
+.profile-dropdown-logout {
+	margin-top: 4px;
+	border-top: 1px solid rgba(255, 255, 255, .15) !important;
+	border-radius: 0 0 8px 8px;
+	color: #FCA5A5 !important;
+}
+.profile-dropdown-logout *, .profile-dropdown-logout svg { color: #FCA5A5 !important; }
+.profile-dropdown-logout:hover, .profile-dropdown-logout:focus-visible {
+	background: var(--danger-bg) !important;
+	color: var(--color-text-on-dark) !important;
+	border-radius: 8px;
+}
+.profile-dropdown-logout:hover *, .profile-dropdown-logout:hover svg { color: var(--color-text-on-dark) !important; }
+.profile-dropdown-email { color: var(--color-text-on-dark-muted) !important; }
+.profile-dropdown-badge { background: var(--color-surface) !important; color: var(--color-primary-800) !important; border: 0 !important; }
+@keyframes profile-dropdown-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Admin pages own the viewport; only .admin-main scrolls. */
+html:has(.admin-layout), body:has(.admin-layout), #root:has(.admin-layout) {
+	height: 100%;
+	overflow: hidden;
+}
+.admin-sidebar-item:hover {
+	background: rgba(255, 255, 255, .12) !important;
+	color: var(--color-text-on-dark) !important;
+	border-color: rgba(255, 255, 255, .2) !important;
+}
+.admin-sidebar-item:hover svg { color: var(--color-text-on-dark) !important; }
+.admin-sidebar-item.is-active, .admin-sidebar-item.is-active:hover {
+	background: var(--color-primary-700) !important;
+	color: var(--color-text-on-dark) !important;
+}
+
+.admin-logout-button {
+	background: var(--danger-bg) !important;
+	color: var(--color-text-on-dark) !important;
+	border: 1.5px solid var(--danger-bg) !important;
+	border-radius: 10px !important;
+	font-weight: 600 !important;
+	transition: all .2s ease;
+}
+.admin-logout-button:hover {
+	background: var(--danger-bg-hover) !important;
+	color: var(--danger-text-hover) !important;
+	border-color: var(--danger-border-hover) !important;
+}
+.admin-logout-button:active { background: #FECACA !important; color: var(--danger-text-hover) !important; }
+.admin-logout-button:focus-visible { outline: 2px solid var(--danger-bg); outline-offset: 2px; }

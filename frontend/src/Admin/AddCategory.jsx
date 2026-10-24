@@ -17,6 +17,7 @@ export default function AddCategory() {
   const [name, setName] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -58,9 +59,21 @@ export default function AddCategory() {
     return [...categories].sort((a, b) => a.name.localeCompare(b.name));
   }, [categories]);
 
-  const submitCategoryHandler = () => {
-    const categoryName = name.trim();
-    dispatch(createCategory({ name: categoryName, image }));
+  const submitCategoryHandler = async () => {
+    try {
+      setIsSubmitting(true);
+      const categoryName = name.trim();
+      await dispatch(createCategory({ name: categoryName, image })).unwrap();
+    } catch (submitError) {
+      toast.error(
+        submitError?.response?.data?.message ||
+          submitError?.message ||
+          submitError ||
+          "Failed to create category",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const validationRules = {
@@ -107,10 +120,10 @@ export default function AddCategory() {
 
               <button
                 type="submit"
-                disabled={categoryCreateLoading}
+                disabled={isSubmitting || categoryCreateLoading}
                 className="w-full py-3.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-200 bg-[#03541e] hover:bg-[#12351f] text-[#ffffff] shadow-lg shadow-[#03541e]/20 hover:shadow-[#03541e]/40 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {categoryCreateLoading ? "Creating..." : "Create Category"}
+                {isSubmitting || categoryCreateLoading ? "CREATING..." : "Create Category"}
               </button>
             </form>
           </div>

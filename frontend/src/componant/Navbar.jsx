@@ -10,6 +10,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import "../PageStyles/Search.css";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../feature/user/userSlice";
+import axios from "../utils/axiosConfig.js";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ function Navbar() {
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isMobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState({ products: [], categories: [] });
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const toggleSearch = () => setSearchOpen(!isSearchOpen);
   const mobileSearchInputRef = useRef(null);
   const handleSearchClick = () => {
@@ -35,14 +38,116 @@ function Navbar() {
   const { cartItems } = useSelector((state) => state.cart);
   const { items: wishlistItems } = useSelector((state) => state.wishlist);
 
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 2) {
+      setSuggestions({ products: [], categories: [] });
+      setSuggestionsLoading(false);
+      return undefined;
+    }
+
+    let isCurrentRequest = true;
+    const timer = setTimeout(async () => {
+      setSuggestionsLoading(true);
+      try {
+        const [productResponse, categoryResponse] = await Promise.allSettled([
+          axios.get(`/api/v1/products?keyword=${encodeURIComponent(query)}&page=1&limit=5`),
+          axios.get("/api/v1/categories"),
+        ]);
+
+        if (!isCurrentRequest) return;
+        const products = productResponse.status === "fulfilled"
+          ? productResponse.value.data?.products || []
+          : [];
+        const categories = categoryResponse.status === "fulfilled"
+          ? (categoryResponse.value.data?.categories || []).filter((category) =>
+              category.name?.toLowerCase().includes(query.toLowerCase()),
+            ).slice(0, 5)
+          : [];
+        setSuggestions({ products, categories });
+      } finally {
+        if (isCurrentRequest) setSuggestionsLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      isCurrentRequest = false;
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
+  const closeSearchSuggestions = () => setSuggestions({ products: [], categories: [] });
+  const searchIsActive = searchQuery.trim().length >= 2;
+  const hasSuggestions = suggestions.products.length > 0 || suggestions.categories.length > 0;
+
+  const handleSuggestionClick = (suggestion) => {
+    if (suggestion.type === "category") {
+      navigate(`/products?category=${encodeURIComponent(suggestion.value)}`);
+    } else {
+      navigate(`/product/${suggestion.value}`);
+    }
+    setSearchQuery("");
+    setSearchOpen(false);
+    setMobileSearchOpen(false);
+    closeSearchSuggestions();
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setMobileSearchOpen(false);
+    setSearchOpen(false);
+    closeSearchSuggestions();
     if (searchQuery.trim()) {
       navigate(`/products?keyword=${encodeURIComponent(searchQuery)}`);
     } else {
       navigate(`/products`);
     }
+  };
+
+  const renderSuggestions = () => {
+    if (!searchIsActive) return null;
+    return (
+      <div className="plant-search-suggestions" role="listbox" aria-label="Search suggestions">
+        {suggestionsLoading && <p className="plant-search-status">Searching...</p>}
+        {!suggestionsLoading && !hasSuggestions && (
+          <p className="plant-search-status">No matching plants or categories</p>
+        )}
+        {!suggestionsLoading && suggestions.categories.length > 0 && (
+          <div className="plant-suggestion-group">
+            <p className="plant-suggestion-heading">Categories</p>
+            {suggestions.categories.map((category) => (
+              <button
+                type="button"
+                className="plant-suggestion-item"
+                key={`category-${category._id}`}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => handleSuggestionClick({ type: "category", value: category.name })}
+              >
+                <span className="plant-suggestion-icon">#</span>
+                <span>{category.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {!suggestionsLoading && suggestions.products.length > 0 && (
+          <div className="plant-suggestion-group">
+            <p className="plant-suggestion-heading">Plants</p>
+            {suggestions.products.map((product) => (
+              <button
+                type="button"
+                className="plant-suggestion-item"
+                key={`product-${product._id}`}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => handleSuggestionClick({ type: "product", value: product._id })}
+              >
+                <img src={product.image?.[0]?.url || product.image?.[0]} alt="" />
+                <span>{product.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -63,7 +168,7 @@ function Navbar() {
     dispatch(logout());
     setIsMenuOpen(false);
     setProfileOpen(false);
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   const options = [
@@ -120,6 +225,8 @@ function Navbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="plant-search-input"
+              onFocus={() => setSearchOpen(true)}
+              aria-label="Search plants and categories"
             />
           </form>
           <button
@@ -129,6 +236,7 @@ function Navbar() {
           >
             <SearchIcon style={{ fontSize: 20 }} />
           </button>
+          {renderSuggestions()}
         </div>
 
         <div className="plant-action-icons flex items-center gap-2">
@@ -178,7 +286,7 @@ function Navbar() {
 
           {/* Overlay */}
           <div
-            className={`fixed inset-0 z-40 bg-[#03541e]/60 backdrop-blur-sm transition-opacity duration-300 ${
+            className={`profile-backdrop fixed inset-0 z-40 transition-opacity duration-150 ${
               profileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
             onClick={toggleProfile}
@@ -210,7 +318,7 @@ function Navbar() {
 
           {/* Dropdown */}
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-52 bg-[#03541e]/95 backdrop-blur-sm border border-[#12351f]/50 rounded-2xl shadow-2xl shadow-[#03541e]/50 overflow-hidden z-50">
+            <div className="profile-dropdown absolute right-0 mt-2 w-52 bg-[#03541e]/95 backdrop-blur-sm border border-[#12351f]/50 rounded-2xl shadow-2xl shadow-[#03541e]/50 overflow-hidden z-50">
 
               {/* Dropdown Header */}
               <div className="px-4 py-3 border-b border-[#12351f]/50 flex items-center gap-2.5">
@@ -224,7 +332,7 @@ function Navbar() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-[#ffffff] truncate">{user?.name || "User"}</p>
-                  <p className="text-xs text-[#55705f] truncate">{user?.email || ""}</p>
+                  <p className="profile-dropdown-email text-xs truncate">{user?.email || ""}</p>
                 </div>
               </div>
 
@@ -235,22 +343,16 @@ function Navbar() {
                     <button
                       onClick={item.funcName}
                       key={item.name}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 text-left ${
-                        item.isCart && cartItems.length > 0
-                          ? "text-[#03541e] bg-[#03541e]/10 hover:bg-[#03541e]/20 border border-[#03541e]/20"
-                          : item.isWishlist && wishlistItems.length > 0
-                          ? "text-[#03541e] bg-[#03541e]/10 hover:bg-[#03541e]/20 border border-[#03541e]/20"
-                          : "text-[#d7eadb] hover:text-[#ffffff] hover:bg-[#12351f]/60"
-                      }`}
+                      className={`profile-dropdown-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 text-left ${item.name === "Logout" ? "profile-dropdown-logout" : ""}`}
                     >
                       <span>{item.name}</span>
                       {item.isCart && cartItems.length > 0 && (
-                        <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-[#03541e] text-[#03541e] text-xs font-bold flex items-center justify-center">
+                        <span className="profile-dropdown-badge ml-2 min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold flex items-center justify-center">
                           {cartItems.length}
                         </span>
                       )}
                       {item.isWishlist && wishlistItems.length > 0 && (
-                        <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-[#03541e] text-[#03541e] text-xs font-bold flex items-center justify-center">
+                        <span className="profile-dropdown-badge ml-2 min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold flex items-center justify-center">
                           {wishlistItems.length}
                         </span>
                       )}
@@ -294,11 +396,13 @@ function Navbar() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           aria-label="Search for plants"
+          onFocus={() => setMobileSearchOpen(true)}
         />
         <button type="submit" aria-label="Submit plant search">
           <SearchIcon style={{ fontSize: 19 }} />
         </button>
       </form>
+      {renderSuggestions()}
     </div>
 
     {/* ── Mobile Menu ── */}

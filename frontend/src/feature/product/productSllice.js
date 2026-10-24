@@ -3,9 +3,9 @@ import axios from "../../utils/axiosConfig.js";
 
 export const getProduct = createAsyncThunk(
   "product/getProduct",
-  async ({ keyword, page = 1, category }, { rejectWithValue }) => {
+  async ({ keyword, page = 1, category, limit = 12 }, { rejectWithValue }) => {
     try {
-      let link = '/api/v1/products?page=' + page;
+      let link = `/api/v1/products?page=${page}&limit=${limit}`;
       if(category){
         link += `&category=${category}`;
       }
@@ -98,7 +98,7 @@ const productSlice = createSlice({
     // lifecycle action implement
     {
       builder
-        .addCase(getProduct.pending, (state, action) => {
+        .addCase(getProduct.pending, (state) => {
           state.loading = true;
           state.error = null;
         })
@@ -118,7 +118,7 @@ const productSlice = createSlice({
         });
 
       builder
-        .addCase(getProductDetails.pending, (state, action) => {
+        .addCase(getProductDetails.pending, (state) => {
           state.loading = true;
           state.error = null;
         })

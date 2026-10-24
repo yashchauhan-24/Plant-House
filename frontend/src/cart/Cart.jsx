@@ -37,7 +37,7 @@ function Cart() {
           <p className="text-[#55705f] text-lg font-medium">Your cart is empty</p>
           <Link
             to="/products"
-            className="px-6 py-2.5 rounded-xl bg-[#03541e] hover:bg-[#12351f] text-[#ffffff] font-bold text-sm tracking-widest uppercase transition-all duration-200 shadow-lg shadow-[#03541e]/20"
+            className="cart-empty-button px-6 py-2.5 rounded-xl bg-[#03541e] hover:bg-[#12351f] text-[#ffffff] font-bold text-sm tracking-widest uppercase transition-all duration-200 shadow-lg shadow-[#03541e]/20"
           >
             Go To Products
           </Link>

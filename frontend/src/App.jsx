@@ -4,9 +4,9 @@ import ProductDetails from "./Pages/ProductDetails";
 import Products from "./Pages/Products";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { loadUser } from "./feature/user/userSlice";
+import { clearClientSession, loadUser } from "./feature/user/userSlice";
 import Profile from "./User/Profile";
-import ProtectedRoutes from "./componant/ProtectedRoutes";
+import ProtectedRoutes, { PublicAuthRoute } from "./componant/ProtectedRoutes";
 import UpdateProfile from "./User/UpdateProfile";
 import UpdatePassword from "./User/UpdatePassword";
 import ForgotPassword from "./User/ForgotPassword";
@@ -40,11 +40,39 @@ import Wishlist from "./Pages/Wishlist";
 function AuthSync() {
   const dispatch = useDispatch();
   const location = useLocation();
+  const isPrivateRoute = ["/profile", "/cart", "/wishlist", "/shipping", "/order", "/orders", "/process", "/paymentSuccess", "/admin"].some((path) => location.pathname.startsWith(path));
 
   useEffect(() => {
     const expectedRole = location.pathname.startsWith('/admin') ? 'admin' : 'user';
     dispatch(loadUser({ expectedRole }));
   }, [dispatch, location.pathname]);
+
+  useEffect(() => {
+    const getToken = () => localStorage.getItem(location.pathname.startsWith("/admin") ? "adminToken" : "userToken");
+    const redirectIfUnauthenticated = () => {
+      if (isPrivateRoute && !getToken()) {
+        window.location.replace(location.pathname.startsWith("/admin") ? "/admin/login" : "/login");
+      }
+    };
+    const handlePageShow = (event) => {
+      const navigation = performance.getEntriesByType("navigation")[0];
+      if (event.persisted || navigation?.type === "back_forward") redirectIfUnauthenticated();
+    };
+    const handleStorage = (event) => {
+      if (["authRole", "adminToken", "userToken", "adminUser", "userData", "isAuthenticated"].includes(event.key)) {
+        if (!localStorage.getItem("adminToken") && !localStorage.getItem("userToken")) {
+          clearClientSession(dispatch);
+        }
+        redirectIfUnauthenticated();
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [isPrivateRoute, location.pathname]);
 
   return null;
 }
@@ -61,18 +89,18 @@ function App() {
         <Route path="/about-us" element={<AboutUs />}/>
         <Route path="/contact-us" element={<ContactUs />}/>
         <Route path="/products/:keyword" element={<Products />}/>
-        <Route path="/register" element={<Register />}/>
+        <Route path="/register" element={<PublicAuthRoute element={<Register />} />}/>
         {/* <Route path="/register" element={<Registers />}/> */}
-        <Route path="/login" element={<Login />}/>
-        <Route path="/admin/login" element={<AdminLogin />}/>
+        <Route path="/login" element={<PublicAuthRoute element={<Login />} />}/>
+        <Route path="/admin/login" element={<PublicAuthRoute element={<AdminLogin />} adminOnly />}/>
         {/* <Route path="/login" element={<Logins />}/> */}
         <Route path="/forgot/password" element={<ForgotPassword />}/>
         <Route path="/profile" element={<ProtectedRoutes element={<Profile />}  />}/>
         <Route path="/profile/update" element={<ProtectedRoutes element={<UpdateProfile />}  />}/>
         <Route path="/password/update" element={<ProtectedRoutes element={<UpdatePassword />}  />}/>
         <Route path="/reset/:token" element={<ResetPassword />}/>
-        <Route path="/cart" element={<Cart />}/>
-        <Route path="/wishlist" element={<Wishlist />}/>
+        <Route path="/cart" element={<ProtectedRoutes element={<Cart />} />}/>
+        <Route path="/wishlist" element={<ProtectedRoutes element={<Wishlist />} />}/>
         <Route path="/shipping" element={<ProtectedRoutes element={<Shipping />}  />}/>
         <Route path="/order/confirm" element={<ProtectedRoutes element={<OrderConfirm />}  />}/>
         <Route path="/process/payment" element={<ProtectedRoutes element={<Payment />}  />}/>

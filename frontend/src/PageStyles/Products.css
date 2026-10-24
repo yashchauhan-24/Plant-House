@@ -10,7 +10,7 @@
 .plant-products-page > div { max-width: 1180px; margin: 0 auto; }
 .plant-products-page aside { min-width: 0; }
 .plant-products-page aside > div { overflow: hidden; }
-.plant-list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.plant-list-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; align-items: stretch; }
 .plant-products-page aside > div { top: 16px; }
 @media (max-width: 767px) {
   .plant-products-page { padding: 16px 12px 36px; }
@@ -18,6 +18,9 @@
   .plant-products-page aside ul { display: flex; flex-direction: row; max-width: 100%; min-width: 0; overflow-x: auto; padding-bottom: 4px; }
   .plant-products-page aside li { flex: 0 0 auto; white-space: nowrap; }
 }
+@media (max-width: 1199px) { .plant-list-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 899px) { .plant-list-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 559px) { .plant-list-grid { grid-template-columns: 1fr; } }
 
 .filter-section {
   flex: 0 0 250px;

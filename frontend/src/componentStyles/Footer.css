@@ -1,11 +1,11 @@
 footer {
-  background: #03541e !important;
-  color: #f4fff7;
+  background: var(--color-primary-900) !important;
+  color: var(--color-text-on-dark);
 }
 
 footer input { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.22) !important; }
-footer .text-\[\#55705f\], footer .text-\[\#12351f\] { color: #a8cdbb !important; }
-footer .text-\[\#d7eadb\] { color: #e4f1e8 !important; }
+footer .text-\[\#55705f\], footer .text-\[\#12351f\] { color: var(--color-text-on-dark-muted) !important; }
+footer .text-\[\#d7eadb\] { color: var(--color-text-on-dark-muted) !important; }
 footer .bg-\[\#12351f\] { background-color: rgba(255,255,255,.08) !important; }
 footer .border-\[\#55705f\] { border-color: rgba(255,255,255,.18) !important; }
 .footer {

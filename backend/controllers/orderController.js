@@ -83,34 +83,53 @@ export const createNewOrder = handleAsyncError(async (req, res, next) => {
 
 // get single product
 export const getSingleOrder = handleAsyncError(async (req, res, next) => {
-  console.log("📝 Fetching order:", req.params.id, "for user:", req.user?._id);
-  const order = await Order.findById(req.params.id);
-  if (!order) {
-    console.error("❌ Order Not found:", req.params.id);
-    return next(new HandleErroe("Order Not found ", 400));
+  try {
+    const order = await Order.findById(req.params.id).populate({
+      path: "orderItem.product",
+      strictPopulate: false,
+    });
+    if (!order) {
+      return next(new HandleErroe("Order Not found ", 400));
+    }
+    return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
   }
-  console.log("✅ Order found:", order._id);
-  res.status(201).json({
-    success: true,
-    order,
-  });
 });
 
 // All my order find
 export const allMyOrder = handleAsyncError(async (req, res, next) => {
-  console.log("📝 Fetching all orders for user:", req.user?._id);
-  if (!req.user || !req.user._id) {
-    console.error("❌ User not authenticated");
-    return next(new HandleErroe("User authentication required", 401));
-  }
-  
-  const orders = await Order.find({ user: req.user._id });
-  console.log("✅ Found", orders.length, "orders for user:", req.user._id);
+  try {
+    if (!req.user || !req.user._id) {
+      return next(new HandleErroe("User authentication required", 401));
+    }
 
-  res.status(201).json({
-    success: true,
-    orders,
-  });
+    const orders = await Order.find({ user: req.user._id })
+      .populate({
+        path: "orderItem.product",
+        strictPopulate: false,
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      orders: Array.isArray(orders) ? orders : [],
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+      orders: [],
+    });
+  }
 });
 
 // get all order

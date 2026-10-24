@@ -11,7 +11,7 @@ function AdminHeader({ onOpenMenu }) {
 
   const handleLogout = async () => {
     await dispatch(logout());
-    navigate("/admin/login");
+    navigate("/admin/login", { replace: true });
   };
 
   return (

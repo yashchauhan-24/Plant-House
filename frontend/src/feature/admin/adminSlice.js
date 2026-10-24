@@ -21,15 +21,9 @@ export const createProducts = createAsyncThunk(
   "admin/createProducts",
   async (productData, { rejectWithValue }) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      };
       const { data } = await axios.post(
         "/api/v1/admin/dashboard/create",
         productData,
-        config,
       );
       return data;
     } catch (error) {
@@ -69,11 +63,12 @@ export const createCategory = createAsyncThunk(
 
 export const updateCategory = createAsyncThunk(
   "admin/updateCategory",
-  async ({ id, name, image }, { rejectWithValue }) => {
+  async ({ id, name, image, oldImage }, { rejectWithValue }) => {
     try {
       const formData = new FormData();
       formData.append("name", name);
       if (image) formData.append("categoryImage", image);
+      if (oldImage) formData.append("oldImage", JSON.stringify(oldImage));
       const { data } = await axios.put(`/api/v1/admin/category/${id}`, formData);
       return data;
     } catch (error) {
@@ -99,15 +94,9 @@ export const updateProduct = createAsyncThunk(
   "admin/updateProduct",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      };
       const { data } = await axios.put(
         `/api/v1/admin/product/${id}`,
         formData,
-        config,
       );
       return data;
     } catch (error) {

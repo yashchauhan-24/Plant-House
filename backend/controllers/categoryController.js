@@ -1,14 +1,46 @@
 import handleAsyncError from "../middleware/handleAsyncError.js";
 import Category from "../model/category.models.js";
 import HandleErroe from "../utils/handleError.js";
-import Product from "../model/product.models.js";
 import { v2 as cloudinary } from "cloudinary";
 
-const uploadCategoryImage = async (file) => {
-  if (!file) return null;
-  const source = file.tempFilePath || `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-  const result = await cloudinary.uploader.upload(source, { folder: "categories" });
-  return { public_id: result.public_id, url: result.secure_url };
+const uploadCategoryImage = (file) =>
+  new Promise((resolve, reject) => {
+    if (!file) {
+      resolve(null);
+      return;
+    }
+
+    const source =
+      file.tempFilePath ||
+      `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+
+    cloudinary.uploader
+      .upload(source, {
+        folder: "categories",
+        resource_type: "image",
+        transformation: [{ width: 1000, crop: "limit", quality: "auto" }],
+      })
+      .then((result) => {
+        resolve({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      })
+      .catch(reject);
+  });
+
+const getCategoryFiles = (file) => {
+  if (!file) return [];
+  return Array.isArray(file) ? file : [file];
+};
+
+const parseImage = (image) => {
+  if (typeof image !== "string") return image;
+  try {
+    return JSON.parse(image);
+  } catch (error) {
+    return image;
+  }
 };
 
 export const getAllCategories = handleAsyncError(async (_req, res) => {
@@ -21,83 +53,106 @@ export const getAllCategories = handleAsyncError(async (_req, res) => {
 });
 
 export const createCategory = handleAsyncError(async (req, res, next) => {
-  const name = req.body?.name?.trim();
+  try {
+    const name = req.body?.name?.trim();
+    if (!name) {
+      return next(new HandleErroe("Category name is required", 400));
+    }
 
-  if (!name) {
-    return next(new HandleErroe("Category name is required", 400));
+    const files = getCategoryFiles(req.files?.categoryImage);
+    const uploadedImages = await Promise.all(files.map(uploadCategoryImage));
+    const image = uploadedImages[0];
+    const category = await Category.create({
+      name,
+      ...(image ? { image } : {}),
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Category created successfully",
+      category,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
   }
-
-  const existing = await Category.findOne({ name: { $regex: `^${name}$`, $options: "i" } });
-  if (existing) {
-    return next(new HandleErroe("Category already exists", 400));
-  }
-
-  const image = await uploadCategoryImage(req.files?.categoryImage);
-  const category = await Category.create({ name, ...(image ? { image } : {}) });
-
-  res.status(201).json({
-    success: true,
-    message: "Category created successfully",
-    category,
-  });
 });
 
 export const updateCategory = handleAsyncError(async (req, res, next) => {
-  const id = req.params.id;
-  const name = req.body?.name?.trim();
-
-  if (!name) {
-    return next(new HandleErroe("Category name is required", 400));
-  }
-
-  const category = await Category.findById(id);
-  if (!category) {
-    return next(new HandleErroe("Category not found", 404));
-  }
-
-  const existing = await Category.findOne({
-    _id: { $ne: id },
-    name: { $regex: `^${name}$`, $options: "i" },
-  });
-  if (existing) {
-    return next(new HandleErroe("Another category with same name exists", 400));
-  }
-
-  category.name = name;
-  const image = await uploadCategoryImage(req.files?.categoryImage);
-  if (image) {
-    if (category.image?.public_id) {
-      await cloudinary.uploader.destroy(category.image.public_id).catch(() => null);
+  try {
+    const name = req.body?.name?.trim();
+    if (!name) {
+      return next(new HandleErroe("Category name is required", 400));
     }
-    category.image = image;
-  }
-  await category.save();
 
-  res.status(200).json({
-    success: true,
-    message: "Category updated successfully",
-    category,
-  });
+    const files = getCategoryFiles(req.files?.categoryImage);
+    const uploadedImages = await Promise.all(files.map(uploadCategoryImage));
+    const image = uploadedImages[0];
+    const update = { name };
+    if (image) update.image = image;
+
+    const category = await Category.findByIdAndUpdate(
+      req.params.id,
+      update,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!category) {
+      return next(new HandleErroe("Category not found", 404));
+    }
+
+    if (image && req.body.oldImage) {
+      const oldImage = parseImage(req.body.oldImage);
+      if (oldImage?.public_id) {
+        Promise.resolve(
+          cloudinary.uploader.destroy(oldImage.public_id),
+        ).catch(() => null);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Category updated successfully",
+      category,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
+  }
 });
 
 export const deleteCategory = handleAsyncError(async (req, res, next) => {
-  const id = req.params.id;
-  const category = await Category.findById(id);
-  if (!category) {
-    return next(new HandleErroe("Category not found", 404));
-  }
-  const linkedProducts = await Product.countDocuments({ category: category.name });
-  if (linkedProducts > 0) {
-    return next(new HandleErroe("Category cannot be deleted while products use it", 409));
-  }
-  await Category.findByIdAndDelete(id);
-  if (category.image?.public_id) {
-    await cloudinary.uploader.destroy(category.image.public_id).catch(() => null);
-  }
+  try {
+    const category = await Category.findByIdAndDelete(req.params.id);
+    if (!category) {
+      return next(new HandleErroe("Category not found", 404));
+    }
 
-  res.status(200).json({
-    success: true,
-    message: "Category deleted successfully",
-    id,
-  });
+    if (category.image?.public_id) {
+      Promise.resolve(
+        cloudinary.uploader.destroy(category.image.public_id),
+      ).catch(() => null);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Category deleted successfully",
+      id: req.params.id,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
+  }
 });

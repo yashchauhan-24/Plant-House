@@ -14,6 +14,7 @@ export default function EditCategory() {
   const [name, setName] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!categories || categories.length === 0) {
@@ -35,11 +36,25 @@ export default function EditCategory() {
     }
 
     try {
-      const res = await dispatch(updateCategory({ id, name: trimmed, image })).unwrap();
+      setIsSubmitting(true);
+      const category = categories.find((item) => item._id === id);
+      const res = await dispatch(updateCategory({
+        id,
+        name: trimmed,
+        image,
+        oldImage: category?.image,
+      })).unwrap();
       toast.success(res.message || "Category updated successfully");
       navigate("/admin/category/create");
     } catch (err) {
-      toast.error(err?.message || err || "Failed to update category");
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          err ||
+          "Failed to update category",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -64,10 +79,10 @@ export default function EditCategory() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                disabled={categoryLoading}
+                disabled={isSubmitting || categoryLoading}
                 className="px-4 py-2 rounded-md bg-[#03541e] text-white"
               >
-                {categoryLoading ? "Updating..." : "Update Category"}
+                {isSubmitting || categoryLoading ? "UPDATING..." : "Update Category"}
               </button>
               <button
                 type="button"

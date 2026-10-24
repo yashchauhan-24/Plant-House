@@ -90,7 +90,8 @@ const orderSlice = createSlice({
         })
         .addCase(getMyAllOrders.fulfilled,(state, action)=>{
             state.loading = false;
-             state.orders = action.payload.orders;
+             state.orders = Array.isArray(action.payload?.orders) ? action.payload.orders : [];
+             state.error = null;
         })
         .addCase(getMyAllOrders.rejected,(state, action)=>{
             state.loading = false,
@@ -105,7 +106,7 @@ const orderSlice = createSlice({
         })
         .addCase(getOrderDetails.fulfilled,(state, action)=>{
             state.loading = false;
-            state.order = action.payload.order;
+            state.order = action.payload?.order || {};
             state.error = null;
         })
         .addCase(getOrderDetails.rejected,(state, action)=>{

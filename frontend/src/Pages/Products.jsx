@@ -14,7 +14,7 @@ import NoProduct from "../componant/NoProduct";
 import Pagination from "../componant/Pagination";
 
 function Products() {
-  const { loading, error, products, resultPerPage, productCount } = useSelector(
+  const { loading, error, products, totalPages } = useSelector(
     (state) => state.product,
   );
   const { categories = [] } = useSelector((state) => state.admin);
@@ -39,7 +39,7 @@ function Products() {
   }, [pageFromUrl]);
 
   useEffect(() => {
-    dispatch(getProduct({ keyword, page: currentPage,category }));
+    dispatch(getProduct({ keyword, page: currentPage, category, limit: 12 }));
   }, [dispatch, keyword,currentPage, category]);
 
   useEffect(() => {
@@ -65,6 +65,7 @@ function Products() {
         newSearchParams.set('page', page);
       }
       navigate(`?${newSearchParams.toString()}`);
+      document.querySelector(".plant-products-page")?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -130,7 +131,7 @@ function Products() {
                       <Product product={product} key={product._id} />
                     ))}
                   </div>
-                  <Pagination currentPage={currentPage} onPageChange={handlePageChange} />
+                  {totalPages > 1 && <Pagination currentPage={currentPage} onPageChange={handlePageChange} />}
                 </div>
               ) : (
                 <div className="flex-1">

@@ -55,7 +55,7 @@ function Product({ product }) {
         className="absolute top-3 right-3 w-9 h-9 rounded-full border border-[#d7eadb] bg-[#ffffff]/90 hover:bg-[#ffffff] text-[#12351f] hover:text-[#03541e] transition-all duration-200 flex items-center justify-center"
         aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
       >
-        {isWishlisted ? <FavoriteIcon style={{ fontSize: 18, color: "#03541e" }} /> : <FavoriteBorderIcon style={{ fontSize: 18 }} />}
+        {isWishlisted ? <FavoriteIcon style={{ fontSize: 18, color: "var(--color-primary-700)" }} /> : <FavoriteBorderIcon style={{ fontSize: 18 }} />}
       </button>
       {/* Hover overlay */}
       <div className="plant-image-shade" />

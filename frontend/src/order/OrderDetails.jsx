@@ -67,9 +67,10 @@ function OrderDetails() {
     shippingPrice,
     itemPrice,
     paidAt,
-  } = order;
+  } = order || {};
   
-  const shippingInfo = shipingInfo;
+  const shippingInfo = shipingInfo || {};
+  const orderItems = Array.isArray(orderItem) ? orderItem : [];
   const normalizedPaymentStatus = paymentInfo?.status?.toString().trim().toLowerCase();
   const isPaid =
     ["succeeded", "success", "paid", "captured", "completed", "succed"].includes(normalizedPaymentStatus) ||
@@ -79,9 +80,10 @@ function OrderDetails() {
   const isDeliveredOrder = (orderStatus || "").toString().trim().toLowerCase() === "delivered";
 
   const openReviewForm = (item) => {
+    const productId = item?.product?._id || item?.product || "";
     setReviewForm({
-      productId: item.product,
-      productName: item.name,
+      productId,
+      productName: item?.name || item?.product?.name || "Product",
       rating: 5,
       comment: "",
     });
@@ -230,8 +232,8 @@ const handleDownload = () => {
   // ── ORDER ITEMS ──
   drawSection("Order Items", "", () => {
     drawRow("", "", false, true); // header row
-    orderItem.forEach((item, idx) => {
-      const isLast = idx === orderItem.length - 1;
+    orderItems.forEach((item = {}, idx) => {
+      const isLast = idx === orderItems.length - 1;
       doc.setFillColor(22, 31, 47);
       doc.roundedRect(10, y, W - 20, 12, 1.5, 1.5, "F");
 
@@ -412,28 +414,28 @@ const handleDownload = () => {
                 </tr>
               </thead>
               <tbody>
-                {orderItem.map((item, index) => (
+                {orderItems.map((item = {}, index) => (
                   <tr
-                    key={item.product || item._id}
-                    className={`hover:bg-[#f4fbf6] transition-colors duration-150 ${index !== orderItem.length - 1 ? "border-b border-[#d7eadb]/60" : ""}`}
+                    key={item?.product?._id || item?.product || item?._id || index}
+                    className={`hover:bg-[#f4fbf6] transition-colors duration-150 ${index !== orderItems.length - 1 ? "border-b border-[#d7eadb]/60" : ""}`}
                   >
                     <td className="px-6 py-3">
                       <div className="w-14 h-14 rounded-xl overflow-hidden border border-[#d7eadb] bg-[#f4fbf6] shrink-0">
                         <img
-                          src={item.image}
+                          src={item?.image || item?.product?.image?.[0]?.url || "/images/no-products.png"}
                           alt="Product"
                           className="w-full h-full object-cover"
                         />
                       </div>
                     </td>
-                    <td className="px-6 py-3 text-[#12351f] font-medium">{item.name}</td>
+                    <td className="px-6 py-3 text-[#12351f] font-medium">{item?.name || item?.product?.name || "Product"}</td>
                     <td className="px-6 py-3 text-center">
                       <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#f4fbf6] border border-[#d7eadb] text-xs font-bold text-[#12351f]">
-                        {item.quantity}
+                        {item?.quantity ?? 0}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-center">
-                      <span className="text-[#03541e] font-bold">₹{item.price}/-</span>
+                      <span className="text-[#03541e] font-bold">₹{item?.price ?? 0}/-</span>
                     </td>
                     <td className="px-6 py-3 text-center">
                       {isDeliveredOrder ? (
@@ -442,7 +444,7 @@ const handleDownload = () => {
                           onClick={() => openReviewForm(item)}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-[#03541e]/30 text-[#03541e] hover:bg-[#03541e]/10 transition-all duration-200"
                         >
-                          {reviewForm.productId === item.product ? "Editing" : "Add / Update"}
+                          {reviewForm.productId === (item?.product?._id || item?.product) ? "Editing" : "Add / Update"}
                         </button>
                       ) : (
                         <span className="text-[10px] text-[#55705f]">After delivery</span>
@@ -528,12 +530,12 @@ const handleDownload = () => {
             <div className="flex items-start gap-4 p-4 rounded-xl bg-[#f4fbf6] border border-[#d7eadb]">
               <span className="text-xs font-bold uppercase tracking-widest text-[#03541e]/80 w-16 shrink-0 pt-0.5">Address</span>
               <span className="text-sm text-[#12351f]">
-                {shippingInfo.address}, {shippingInfo.city}, {shippingInfo.state}, {shippingInfo.country}, {shippingInfo.pincode}
+                {shippingInfo?.address || "Address unavailable"}, {shippingInfo?.city || ""}, {shippingInfo?.state || ""}, {shippingInfo?.country || ""}, {shippingInfo?.pincode || ""}
               </span>
             </div>
             <div className="flex items-center gap-4 p-4 rounded-xl bg-[#f4fbf6] border border-[#d7eadb]">
               <span className="text-xs font-bold uppercase tracking-widest text-[#03541e]/80 w-16 shrink-0">Phone</span>
-              <span className="text-sm text-[#12351f]">{shippingInfo.phoneNo}</span>
+              <span className="text-sm text-[#12351f]">{shippingInfo?.phoneNo || "Phone unavailable"}</span>
             </div>
           </div>
         </div>

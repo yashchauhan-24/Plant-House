@@ -13,9 +13,6 @@ function UserDashboard({ user }) {
   const toggleMenu = () => {
     setMenuVisible((prev) => !prev);
   };
-  const closeMenu = () => {
-    setMenuVisible(false);
-  };
   const dispatch = useDispatch();
   const options = [
     { name: "Orders", funcName: orders },
@@ -49,7 +46,7 @@ function UserDashboard({ user }) {
           autoClose: 3000,
         });
         dispatch(removeSuccess());
-        navigate("/login");
+        navigate("/login", { replace: true });
       })
       .catch((error) => {
         toast.error(error?.message || "Logout failed", {
